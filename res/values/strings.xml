@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SetIMig</string>
+    <string name="main_screen">SetIMig 7,5</string>
+    <string name="splash_screen">SetIMig 7,5</string>
+    
+    <string name="start">Start!</string>
+    <string name="version">V 3.0</string>
+    <string name="licence">GPLv3 Free Software License </string>
+    <string name="source">The source code is hosted at:\n http://github.com/fcsonline/android-setimig</string>
+    <string name="about">This application is an open source project hosted at:\n http://github.com/fcsonline/android-setimig.\nContributors:\n- Ferran Basora (fcsonline@gmail.com)\n\n Resources from:\n- 1001FreeFonts\n- Yusukekamiyamane.com (Creative Commons)\n\nThanks to all!</string>
+    <string name="instructions">
+    The goal is to get a 7.5. Once you get your first card you should bet. Options:\n- Increase bet\n- Decrease bet\n\nThen you can:\n- Hit a card\n- Stand\n- Special key for the first card given.\n\nSpecial key:\nIf you get a 3, you can choose to not to play. If you get a 4 you can choose to change such card. If you get a half next to another you can choose to \'Split\'. If you get a 7 you can choose to \'Dead\' (7+0,5).\n\nScore:\n� Low -x1\n� High x1\n� 7,5 x2\n� Dead x3
+    </string>
+</resources>

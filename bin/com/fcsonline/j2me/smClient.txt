@@ -1,0 +1,126 @@
+import javax.bluetooth.*;
+import java.io.*;
+import java.util.*;
+import javax.microedition.io.*;
+import javax.microedition.lcdui.Display;
+
+public class smClient implements DiscoveryListener {
+    public static final UUID SERVICE_ID = new UUID(0x8171);
+    public static final UUID[] SERVICIOS = new UUID[]{ SERVICE_ID };
+    public static final int[] ATRIBUTOS = null;
+    
+    private Vector busquedas;
+    private smMain listener;
+    private DiscoveryAgent discoveryAgent;
+    
+    public smClient(smMain l) {
+        listener = l;
+        busquedas = new Vector();
+        
+        LocalDevice localDevice = null;
+        try {
+            localDevice = LocalDevice.getLocalDevice();
+            localDevice.setDiscoverable(DiscoveryAgent.GIAC);
+            discoveryAgent = localDevice.getDiscoveryAgent();
+        } catch(Exception e) {
+            e.printStackTrace();
+            System.err.println("No se puede hacer uso de Bluetooth");
+        }
+    }
+    
+    public void startClient() {
+        try {
+            discoveryAgent.startInquiry(DiscoveryAgent.GIAC, this);
+        } catch(BluetoothStateException e) {
+            e.printStackTrace();
+            System.err.println("No se pudo comenzar la busqueda");
+        }
+    }
+    public void stopClient() {
+        discoveryAgent.cancelInquiry(this);
+        Enumeration en = busquedas.elements();
+        Integer i;
+        while(en.hasMoreElements()) {
+            i = (Integer) en.nextElement();
+            discoveryAgent.cancelServiceSearch(i.intValue());
+        }
+    }
+    
+    //metodos de la interfaz DiscoveryListener
+
+    public void deviceDiscovered(RemoteDevice remoteDevice, DeviceClass deviceClass) {
+        String address = remoteDevice.getBluetoothAddress();
+        String friendlyName = null;
+
+        try {
+            friendlyName = remoteDevice.getFriendlyName(true);
+        } catch(IOException e) { }
+        
+        String device = null;
+        
+        if(friendlyName == null) {
+            device = address;
+        } else {
+            device = friendlyName + " ("+address+")";
+        }
+
+        try {
+            int transId = discoveryAgent.searchServices(ATRIBUTOS, SERVICIOS, remoteDevice, this);
+            System.out.println("Comenzada busqueda de serivicios en: "+device+"; "+transId);
+            busquedas.addElement(new Integer(transId));
+        } catch(BluetoothStateException e) {
+            e.printStackTrace();
+            System.err.println("No se pudo comenzar la busqueda");
+        }
+    }
+
+    public void inquiryCompleted(int discType) {
+        switch(discType) {
+            case DiscoveryListener.INQUIRY_COMPLETED: System.out.println("Busqueda de dispositivos concluida con normalidad"); break;
+            case DiscoveryListener.INQUIRY_TERMINATED: System.out.println("Busqueda de dispositivos cancelada"); break;
+            case DiscoveryListener.INQUIRY_ERROR: System.out.println("Busqueda de dispositivos finalizada debido a un error"); break;
+        }
+    }
+
+    public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+        ServiceRecord service = null;
+        for(int i = 0; i < servRecord.length; i++){
+            service = servRecord[i];
+            String url = service.getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, false);
+
+            StreamConnection connection = null;
+            DataInputStream in = null;
+            DataOutputStream out = null;
+            
+            try {
+                connection = (StreamConnection) Connector.open(url);
+                in = connection.openDataInputStream();
+                out = connection.openDataOutputStream();
+               
+                listener.serverDetected(connection, in, out);
+
+                
+                stopClient(); //cancelamos las busquedas
+            } catch(IOException e) {
+                e.printStackTrace();
+            } /*finally {
+                try {
+                    if(in != null) in.close();
+                    if(out != null) out.close();
+                    if(connection != null) connection.close();
+                } catch(IOException e) {}
+            }*/
+        }
+    }
+
+    public void serviceSearchCompleted(int transID, int respCode) {
+        System.out.println("Busqueda de servicios "+ transID+ " completada");
+        switch(respCode) {
+            case DiscoveryListener.SERVICE_SEARCH_COMPLETED: System.out.println("Busqueda completada con normalidad"); break;
+            case DiscoveryListener.SERVICE_SEARCH_TERMINATED: System.out.println("Busqueda cancelada"); break;
+            case DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE: System.out.println("Dispositivo no alcanzable"); break;
+            case DiscoveryListener.SERVICE_SEARCH_NO_RECORDS: System.out.println("No se encontraron registros de servicio"); break;
+            case DiscoveryListener.SERVICE_SEARCH_ERROR: System.out.println("Error en la busqueda"); break;
+        }
+    }
+}

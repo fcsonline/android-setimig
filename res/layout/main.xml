@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" android:background="#05614c">
+
+
+<LinearLayout android:id="@+id/LinearLayout03" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
+<TextView android:text="@+id/TextViewMoney" android:id="@+id/TextViewMoney" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textSize="25px"></TextView>
+<TextView android:text="@+id/TextViewSum" android:id="@+id/TextViewSum" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textStyle="bold" android:textSize="25px"></TextView>
+<TextView android:text="@+id/TextViewBet" android:id="@+id/TextViewBet" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textSize="25px"></TextView>
+<TextView android:text="@+id/TextViewUserName" android:id="@+id/TextViewUserName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textSize="25px"></TextView>
+</LinearLayout>
+
+<LinearLayout android:id="@+id/LinearLayout02" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
+<Button android:text="Up" android:id="@+id/ButtonUp" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+<Button android:text="Down" android:id="@+id/ButtonDown" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+<Button android:text="Stand!" android:id="@+id/ButtonStand" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+<Button android:text="More!" android:id="@+id/ButtonMore" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+<Button android:text="ESPECIAL!" android:id="@+id/ButtonSpecial" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+</LinearLayout>
+
+
+<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
+
+</LinearLayout>
+
+
+
+</LinearLayout>

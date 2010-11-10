@@ -1,0 +1,894 @@
+import java.util.Timer;
+import java.util.TimerTask;
+
+import javax.microedition.lcdui.Canvas;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.media.Manager;
+
+
+public class smPlayer extends Canvas implements CommandListener {
+
+	static final int[] styles = { Font.STYLE_PLAIN, Font.STYLE_BOLD, Font.STYLE_ITALIC };
+
+	static final int[] sizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM, Font.SIZE_LARGE };
+
+	static final int[] faces = { Font.FACE_SYSTEM, Font.FACE_MONOSPACE, Font.FACE_PROPORTIONAL };
+
+	static final int gWAIT = 0;
+
+	static final int gSTART = 1;
+
+	static final int gBET = 2;
+
+	static final int gCARD = 3;
+
+	static final int gDESD = 4;
+
+	static final int gDEAD = 5;
+
+	static final int gCHANGE = 6;
+
+	static final int gNOPLAY = 7;
+
+	static final int gDEALER = 8;
+
+	static final int StartMoney = 50;
+
+	static final int MaxBet = 25;
+
+	private String PlayerName;
+
+	private smGame[] games;
+
+	private smGame dgame;
+
+	private smDealer dealer;
+
+	private int ngames;
+
+	private int widthgames;
+
+	private int money;
+
+	private int lastmoney;
+
+	private int level;
+
+	private int cursor, inicursor;
+
+	private Command exitCommand;
+	
+    private Image stand;
+
+	private smMain midlet;
+
+	private int StatusGame;
+
+	private boolean newMessage;
+	
+	private Timer timer;
+	
+	private TimeOutTimerTask timeouttimertask;
+    
+    private MessageTimerTask messagetimertask;
+	
+	private int timeout;
+
+    private int coordX;
+    
+    private int coordY;
+    
+    private int dragBet;
+    
+    private boolean mousePressed;
+	
+    private DoubleClickTimerTask doubleclicktimertask;
+
+	public smPlayer(smMain m, smDealer d, String n, int l, int timeout) {
+		ngames = 0;
+		money = StartMoney;
+		lastmoney = 0;
+		cursor = 0;
+		inicursor = 0;
+		PlayerName = n;
+		level = l;
+		newMessage = false;
+		widthgames = (getWidth() - 6) / 20;
+
+        mousePressed = false;
+
+		midlet = m;
+
+		games = new smGame[16];
+		dgame = new smGame(midlet);
+
+		dealer = d;
+
+		exitCommand = new Command("Exit", Command.EXIT, 0);
+		addCommand(exitCommand);
+
+		setCommandListener(this);
+		StatusGame = gSTART;
+		    
+        timer = new Timer();
+
+		if (timeout > 0)
+		{
+			this.timeout = timeout;
+		    timeouttimertask = new TimeOutTimerTask(this, timeout);
+		    timer.schedule(timeouttimertask, 0, 1000);
+		}
+       
+        if (hasPointerMotionEvents()){ 
+            try {
+                stand = Image.createImage("/motion.png");
+            } catch (Exception ioe) {
+                System.out.println("Error al cargar archivo de imagen");
+            }
+        }
+		
+		Play();
+	}
+
+	public void SetStop() {
+	    if (timeouttimertask != null) 
+	    	timeouttimertask.cancel();
+		midlet.Continue = false;
+		midlet.StartGame();
+	}
+	
+	public void SetContinue() {
+		if (timeout > 0)
+		{
+		    timer = new Timer();
+		    timeouttimertask = new TimeOutTimerTask(this, timeout);
+		    timer.schedule(timeouttimertask, 0, 1000);
+		}
+	}
+	
+	public void SetPause() {
+		if (timeouttimertask != null) {
+			timeout = timeouttimertask.getTimeout();
+			timer.cancel();
+			timeouttimertask.cancel();			
+		}
+	}
+	
+	public void SetMoney(int m) {
+		money = m;
+	}
+
+	public int GetMoney() {
+		return money;
+	}
+
+	public void Play() {
+		int card;
+
+		// Final partida
+		if (StatusGame == gSTART && money < 1) {
+			SetStop();
+		}
+
+		switch (StatusGame) {
+		case 0: // gWAIT
+			break;
+		case 1: // gSTART
+
+			Reset();
+
+			ngames = 1;
+			games[0] = new smGame(midlet);
+			cursor = 0;
+			lastmoney = 0;
+			games[0].SetColumnCards(getHeight() / 20);
+
+			dealer.Reset();
+
+			card = dealer.NextCard();
+			games[cursor].AddCard(card);
+
+			games[cursor].SetBet(Math.min(5, SufMoney()));
+
+			if (games[cursor].IsChangeCard())
+				StatusGame = gCHANGE;
+			else if (games[cursor].IsNoPlay())
+				StatusGame = gNOPLAY;
+			else if (games[cursor].IsDead())
+				StatusGame = gDEAD;
+			else
+				StatusGame = gBET;
+
+			break;
+		case 2: // gBET
+		case 3: // gCard
+
+			card = dealer.NextCard();
+
+			if (games[cursor].IsHalf() && games[cursor].CardValue(card) == 5
+					&& IsSufMoney())
+				StatusGame = gDESD;
+
+			games[cursor].AddCard(card);
+
+			if (games[cursor].IsChangeCard())
+				StatusGame = gCHANGE;
+			if (games[cursor].IsNoPlay())
+				StatusGame = gNOPLAY;
+			if (games[cursor].IsDead())
+				StatusGame = gDEAD;
+			if (games[cursor].GetStatus() == smGame.LOST)
+				NextGame();
+			if (games[cursor].GetSum() == 75 && midlet.CheckOption(3)) {
+				games[cursor].SetStand();
+				NextGame();
+			}
+
+			break;
+
+		case 4: // gDESD
+			break;
+
+		case 5: // gDEAD
+
+			card = dealer.NextCard();
+
+			if (games[cursor].CardValue(card) == 70) {
+				StatusGame = gDEAD;
+				// Create a new game
+				games[ngames] = new smGame(midlet);
+				games[ngames].SetColumnCards(getHeight() / 20);
+				games[ngames].AddCard(card);
+				games[ngames].SetBet(Math.min(5, SufMoney()));
+
+				ngames++;
+			} else if (games[cursor].CardValue(card) == 5) {
+				games[cursor].AddCard(card);
+				games[cursor].SetStand();
+				NextGame();
+			} else {
+				games[cursor].AddCard(card);
+				NextGame();
+			}
+
+			break;
+
+		case 6: // gCHANGE
+			games[cursor].DeleteLastCard();
+			StatusGame = gCARD;
+			break;
+		}
+
+		repaint();
+	}
+
+	private void PlayDealer() {
+
+		int card = 0;
+		int suma = 0;
+		int ponderat = 0;
+
+		if (midlet.CheckOption(4))
+			StatusGame = gDEALER;
+
+		dgame = new smGame(midlet);
+		dgame.SetColumnCards(getHeight() / 20);
+
+		for (int i = 0; i < ngames; i++) {
+			if (games[i].GetStatus() == smGame.STAND) {
+				ponderat += (games[i].GetBet() * games[i].GetSum());
+				suma += games[i].GetBet();
+			}
+		}
+
+		if (suma == 0) suma++;
+
+		ponderat = ponderat / suma;
+
+		if (ponderat == 0)
+			StatusGame = gWAIT;
+		else
+			switch (level) {
+			case 0:
+				while (!dgame.IsEnd())
+					dgame.AddCard(dealer.NextCard());
+
+				break;
+			case 1:
+
+				while (dgame.GetSum() < ponderat && dgame.GetSum() <= 75)
+					dgame.AddCard(dealer.NextCard());
+
+				break;
+			case 2:
+
+				card = dealer.NextCard();
+
+				while (dgame.GetSum() < ponderat
+						&& (dgame.GetSum() + dgame.CardValue(card)) <= 75) {
+					dgame.AddCard(card);
+					card = dealer.NextCard();
+				}
+
+				break;
+			default:
+			}
+
+		Validate(dgame.GetSum());
+	}
+
+	public void commandAction(Command c, Displayable s) {
+		if (c == exitCommand) {
+			SetPause();
+			midlet.Continue = true;
+			midlet.StartGame();
+		}
+	}
+
+	public void Validate(int ndealer) {
+
+		lastmoney = 0;
+
+		for (int i = 0; i < ngames; i++) {
+			if (dgame.GetStatus() == smGame.LOST) {
+
+				switch (games[i].GetStatus()) {
+				case 4: // NOPLAY
+					break;
+				case 1: // STAND
+
+					if (games[i].GetSum() != 75)
+						lastmoney += games[i].GetBet();
+					else if (games[i].IsDeadEnd())
+						lastmoney += (3 * games[i].GetBet());
+					else
+						lastmoney += (2 * games[i].GetBet());
+
+					break;
+				case 2: // LOST
+					lastmoney -= games[i].GetBet();
+					break;
+				}
+
+			} else {
+
+				if (games[i].Validate(ndealer) == smGame.NOPLAY) {
+
+				} else if (games[i].Validate(ndealer) == smGame.WIN) {
+					if (games[i].GetSum() != 75)
+						lastmoney += games[i].GetBet();
+					else if (games[i].IsDeadEnd())
+						lastmoney += (3 * games[i].GetBet());
+					else
+						lastmoney += (2 * games[i].GetBet());
+
+				} else if (games[i].Validate(ndealer) == smGame.LOST) {
+					lastmoney -= games[i].GetBet();
+				}
+			}
+		}
+		money += lastmoney;
+		
+		if (money > midlet.records[level]) {
+			midlet.records[level] = money;
+			newMessage = true;
+		}
+		if (lastmoney > midlet.records[4]) {
+			midlet.records[4] = lastmoney;
+			newMessage = true;
+		}
+		if (lastmoney < 0 && -lastmoney > midlet.records[3]) {
+			midlet.records[3] = -lastmoney;
+			newMessage = true;
+		}
+		repaint();
+	}
+
+	public void Reset() {
+
+		dealer.Reset();
+
+		for (int i = 0; i < 16; i++) {
+			if (games[i] != null)
+				games[i] = null;
+		}
+
+		ngames = 0;
+	}
+
+	public void paint(Graphics g) {
+		PrintGames(g);
+	}
+
+	private void PrintGames(Graphics g) {
+		String nc = "";
+		Font font = null;
+		int sum = 0;
+		int fontHeight = 0;
+		int fontBase = 0;
+		String[] levels = { "Easy", "Normal", "Dificult" };
+		
+        font = Font.getFont(faces[0], styles[1], sizes[0]);
+		g.setFont(font);
+        fontHeight = font.getHeight();
+        fontBase = font.getBaselinePosition();
+
+		// Fons
+		g.setColor(0x22BB22);
+		g.fillRect(0, 0, getWidth(), getHeight());
+
+		// Tapete
+		g.setColor(0x55FF55);
+		g.fillRoundRect(3, fontHeight + 5, getWidth() - 6, getHeight() - fontHeight - 5, 5, 5);
+
+		// Jugador
+		if (StatusGame == gDEALER)
+			nc = "DEALER";
+		else
+			nc = PlayerName;
+        
+        font = Font.getFont(faces[0], styles[1], sizes[2]);
+		g.setFont(font);
+        fontHeight = font.getHeight();
+        fontBase = font.getBaselinePosition();
+
+		g.setColor(0x33DD33);
+		g.drawString(nc, getWidth() / 2, getHeight() / 2, (Graphics.BASELINE | Graphics.HCENTER));
+
+		
+// Title bar
+
+		font = Font.getFont(faces[0], styles[0], sizes[0]);
+		g.setFont(font);
+        fontHeight = font.getHeight();
+        fontBase = font.getBaselinePosition();
+        
+        g.setColor(0x000000);
+		g.fillRect(0, 0, getWidth(), fontHeight);
+
+		g.setColor(0xFFFFFF);
+
+		nc = "Money: $" + money;
+		if (StatusGame == gDEALER || StatusGame == gWAIT)
+			nc += "/" + lastmoney;
+		g.drawString(nc, 5, fontBase + 1, (Graphics.BASELINE | Graphics.LEFT));
+
+        // Games
+
+		nc = (cursor + 1) + "/" + ngames;
+		g.drawString(nc, getWidth() - 2, fontBase + 1, (Graphics.BASELINE | Graphics.RIGHT));
+
+		if (cursor < inicursor || cursor >= (inicursor + widthgames)) {
+			if (cursor < inicursor)
+				inicursor = cursor;
+			else
+				inicursor = (cursor - widthgames + 1);
+		}
+
+// Timeout
+		if (timeout > 0){
+			
+			//if (timeouttimertask.getTimeout() <= 30 && timeouttimertask.getTimeout() % 2 == 0)
+            g.setColor(0x33DD33);
+			
+			int min = timeouttimertask.getTimeout() / 60;
+			int sec = timeouttimertask.getTimeout() % 60;
+			nc = (min < 10 ? "0": "" ) + min + ":" + (sec < 10 ? "0": "" ) + sec;
+	
+            font = Font.getFont(faces[0], styles[1], sizes[1]);
+            g.setFont(font);
+            g.drawString(nc, getWidth() / 2, getHeight() / 2 + 20, (Graphics.TOP | Graphics.HCENTER));
+		
+            font = Font.getFont(faces[0], styles[0], sizes[2]);
+            g.setFont(font);
+		
+			g.setColor(0xFFFFFF);
+		}
+
+		if (StatusGame == gDEALER)
+			dgame.PrintCanvas(g, getWidth() / 2 - 10, false);
+		else
+			for (int i = inicursor; (i < ngames && i < inicursor + widthgames); i++) {
+				games[i].PrintCanvas(g, 6 + (i - inicursor) * 20, i == cursor);
+			}
+            
+        font = Font.getFont(faces[0], styles[0], sizes[0]);
+        g.setFont(font);
+        fontHeight = font.getHeight();
+        fontBase = font.getBaselinePosition();
+
+		// Panell Inferior
+		g.setColor(0xFFDF00);
+		g.fillRect(0, getHeight() - fontHeight, getWidth(), fontHeight);
+
+		g.setColor(0x000000);
+		g.drawRect(0, getHeight() - fontHeight, getWidth(), fontHeight);
+
+		if (StatusGame == gDEALER) {
+			sum = dgame.GetSum();
+			if (sum % 10 == 5)
+				nc = "" + sum / 10 + ",5";
+			else
+				nc = "" + sum / 10;
+
+			g.setColor(0x000000);
+			nc = "Sum: " + nc;
+
+		} else {
+			// Sum carta
+			sum = games[cursor].GetSum();
+			if (sum % 10 == 5)
+				nc = "" + sum / 10 + ",5";
+			else
+				nc = "" + sum / 10;
+
+			g.setColor(0x000000);
+			nc = "$" + games[cursor].GetBet() + " Sum: " + nc;
+		}
+
+		g.drawString(nc, 3, getHeight() - 3, (Graphics.BASELINE | Graphics.LEFT));
+
+		if (StatusGame == gWAIT) {
+			sum = dgame.GetSum();
+			if (sum > 0) {
+				nc = "CPU: ";
+				if (sum % 10 == 5)
+					nc += "" + sum / 10 + ",5";
+				else
+					nc += "" + sum / 10;
+			} else
+				nc = "CPU Win";
+		} else {
+			nc = levels[level];
+		}
+
+		g.drawString(nc, getWidth() - 4, getHeight() - 3, (Graphics.BASELINE | Graphics.RIGHT));
+
+		if (midlet.CheckOption(2) && StatusGame == gWAIT && newMessage) {
+		    printMessage(g, "New Record", 2000);
+        }
+        
+        if (hasPointerMotionEvents()){
+            g.drawImage(stand, getWidth() / 2, getHeight() - stand.getHeight() - fontHeight - 10, Graphics.HCENTER | Graphics.VCENTER);
+            if (midlet.getFirstExecution()) printMessage(g, "Motion events activated!", 3000);
+        }
+
+	}
+
+	public void keyPressed(int keyCode) {
+
+		int action = getGameAction(keyCode);
+
+		// UP & DOWN
+		switch (StatusGame) {
+		case 0:
+			break;
+		case 2:
+		case 5:
+		case 6:
+		case 7:
+			if (action == UP)
+            {
+			    int betfive = games[cursor].GetBet(); 
+                do betfive++; while(betfive % 5 != 0);
+                games[cursor].SetBet(Math.min(SufMoney(), Math.min(betfive, MaxBet)));
+            }
+			if (action == DOWN)
+				games[cursor].SetBet(Math.max(games[cursor].GetBet() - 1, 1));
+			break;
+		}
+
+		// FIRE
+		if (action == FIRE) {
+			switch (StatusGame) {
+			case 0:
+			case 8:
+				StatusGame = gSTART;
+				Play();
+				break;
+
+			case 2:
+			case 3:
+			case 4:
+			case 6:
+			case 7:
+				StatusGame = gCARD;
+				Play();
+				break;
+			case 5:
+				StatusGame = gDEAD;
+				Play();
+				break;
+				/*StatusGame = gWAIT;
+                System.out.println("BUG!");
+				break;*/
+			}
+		}
+
+		// RIGHT
+		if (action == RIGHT) {
+			switch (StatusGame) {
+			case 0:
+				cursor = Math.min(cursor + 1, ngames - 1);
+				break;
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+
+				games[cursor].SetStand();
+				NextGame();
+
+				break;
+			}
+		}
+
+		// LEFT
+		if (action == LEFT) {
+			switch (StatusGame) {
+			case 0:
+				cursor = Math.max(0, cursor - 1);
+				break;
+			case 2:
+			case 3:
+				break;
+			case 4:
+				// Create a new game
+				games[ngames] = new smGame(midlet);
+				games[ngames].SetColumnCards(getHeight() / 20);
+				games[ngames].AddCard(games[cursor].DeleteLastCard());
+				games[ngames].SetBet(Math.min(5, SufMoney()));
+				ngames++;
+
+				games[cursor].SetBet(Math.min(games[cursor].GetBet(),
+						SufMoney()));
+
+				if (ngames > midlet.records[5]) {
+					midlet.records[5] = ngames;
+					newMessage = true;
+				}
+
+				StatusGame = gBET;
+
+				break;
+			case 5:
+				StatusGame = gDEAD;
+				Play();
+
+				break;
+			case 6:
+				games[cursor].DeleteLastCard();
+				StatusGame = gBET;
+				Play();
+				break;
+			case 7:
+				games[cursor].SetNoplay();
+				NextGame();
+				break;
+			}
+		}
+
+		repaint();
+	}
+
+	public void NextGame() {
+
+		cursor++;
+
+		if (cursor == ngames) {
+			// Final de joc
+			PlayDealer();
+
+			if (!midlet.CheckOption(4))
+				StatusGame = gWAIT;
+
+			cursor = 0;
+		} else {
+
+			games[cursor].SetBet(Math.min(games[cursor].GetBet(), SufMoney()));
+
+			if (midlet.CheckOption(1)) games[cursor].SetBet(Math.min(games[cursor - 1].GetBet(), SufMoney()));
+
+			StatusGame = gBET;
+			if (games[cursor].IsDead()) StatusGame = gDEAD;
+		}
+
+	}
+
+	public boolean IsSufMoney() {
+		return SufMoney() > 0;
+	}
+
+	public int SufMoney() {
+		int sum = 0;
+		for (int i = 0; i < ngames && i < cursor; i++)
+			sum += games[i].GetBet();
+
+		sum += (ngames - cursor - 1);
+
+		return money - sum;
+	}
+
+    public String getName(){
+        return PlayerName;
+    }
+    
+    public void setPressed(boolean b){
+        mousePressed = b;
+    }
+
+    public void printMessage(Graphics g, String m, int timeout){
+        Font font;
+
+        g.setColor(0x22bb22);
+        g.fillRoundRect(10, getHeight() / 2 - 5, getWidth() - 20, 20, 5, 5);
+        g.setColor(0xEEEEEE);
+        font = Font.getFont(faces[0], styles[1], sizes[1]);
+        g.setFont(font);
+        g.drawString(m, getWidth() / 2, getHeight() / 2 - 3, (Graphics.TOP | Graphics.HCENTER));
+        newMessage = false;
+        
+        messagetimertask = new MessageTimerTask(midlet);
+		timer.schedule(messagetimertask, timeout);
+    }
+
+    public void pointerPressed(int x, int y){
+    
+        if (mousePressed){
+            pointerDoubleClick(x, y);        
+            return;
+        }    
+
+        mousePressed = true;
+
+        dragBet = games[cursor].GetBet();
+
+        coordX = x;
+        coordY = y;
+
+        doubleclicktimertask = new DoubleClickTimerTask(this);
+		timer.schedule(doubleclicktimertask, 500);
+    }
+    
+    public void pointerDoubleClick(int x, int y){
+
+        int keycode = 0;
+        boolean found = false;
+
+        for (int i = inicursor; (i < ngames && i < inicursor + widthgames); i++) {
+				
+            if ( x > 6 + (i - inicursor) * 20 && x < 6 + (i - inicursor + 1) * 20)
+                if (y > 17 && y < (17 * games[i].GetNCards() * 15)) {
+                    
+                    for (keycode = KEY_NUM0; keycode < KEY_NUM9; keycode++) {
+                        if (getGameAction(keycode) == LEFT) break;
+                    }
+                    
+                    keyPressed(keycode);
+                    
+                    found = true;
+                }
+        }
+
+        if (!found) {
+            for (keycode = KEY_NUM0; keycode < KEY_NUM9; keycode++) {
+                if (getGameAction(keycode) == FIRE) break;
+            }
+
+            keyPressed(keycode);
+        }
+    }
+    
+    public void pointerReleased(int x, int y){
+    }
+    
+    public void pointerDragged(int x, int y){
+
+        int difX = x - coordX;
+        int difY = y - coordY;
+
+		switch (StatusGame) {
+		case 0: break;
+		case 2:
+		case 3:
+		case 5:
+		case 6:
+		case 7:
+
+          
+            if (Math.abs(difX) < 15 && Math.abs(difY) < 15) return;
+
+            if (Math.abs(difY) > Math.abs(difX)){
+
+                difY = -difY;
+
+                int bet = dragBet + (difY * 10 ) / getHeight();
+
+                if (difY > 0) games[cursor].SetBet(Math.min(SufMoney(), Math.min( bet , MaxBet)));
+                if (difY < 0) games[cursor].SetBet(Math.max(bet, 1));
+            }else{
+
+                if (difX > getWidth() / 2){
+                    int keycode = 0;
+
+                    for (keycode = KEY_NUM0; keycode < KEY_NUM9; keycode++)
+                        if (getGameAction(keycode) == RIGHT) break;
+
+                    keyPressed(keycode);
+                }
+            }
+        }
+
+    }
+}
+
+class DoubleClickTimerTask extends TimerTask
+{
+	private smPlayer player;
+	
+	public DoubleClickTimerTask(smPlayer player)
+	{
+		this.player = player;
+	}
+
+	public final void run()
+	{
+        player.setPressed(false);
+	}
+
+}
+
+class MessageTimerTask extends TimerTask
+{
+	private smMain midlet;
+	
+	public MessageTimerTask(smMain midlet)
+	{
+		this.midlet = midlet;
+	}
+
+	public final void run()
+	{
+        midlet.setFirstExecution(false);
+	}
+
+}
+
+
+class TimeOutTimerTask extends TimerTask
+{
+	private smPlayer player;
+	private int timeout;
+	
+	public TimeOutTimerTask(smPlayer player, int timeout)
+	{
+		this.player = player;
+		this.timeout = timeout;
+	}
+
+	public final void run()
+	{
+		timeout--;
+		
+		if (timeout <= 0)
+			player.SetStop();
+		
+		player.repaint();
+	}
+
+	public int getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
+	}
+
+}

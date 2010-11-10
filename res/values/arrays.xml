@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string-array name="listArray">
+   <item>Value 1</item>
+   <item>Value 2</item>
+   <item>Value 3</item>
+</string-array>
+ 
+<string-array name="listValues">
+   <item>1</item>
+   <item>2</item>
+   <item>3</item>
+</string-array>
+
+<string-array name="listTimeoutArray">
+   <item>1 min</item>
+   <item>2 mins</item>
+   <item>5 mins</item>
+   <item>10 mins</item>
+   <item>30 mins</item>
+   <item>1 hour</item>
+   <item>3 hours</item>
+</string-array>
+ 
+<string-array name="listTimeoutValues">
+   <item>60</item>
+   <item>120</item>
+   <item>300</item>
+	<item>600</item>
+   <item>1800</item>
+   <item>3600</item>
+   <item>10800</item>
+</string-array>
+
+</resources>

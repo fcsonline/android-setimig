@@ -1,0 +1,40 @@
+import java.util.Random;
+
+public class smDealer {
+	private boolean[] cards = new boolean[52];
+
+	private int ncards;
+
+	private Random random = new Random();
+
+	public smDealer() {
+		Reset();
+	}
+
+	public void Reset() {
+
+		for (int i = 0; i < 52; i++) {
+			cards[i] = (i % 13 == 7 || i % 13 == 8);
+		}
+
+		ncards = (7 + 4) * 4;
+
+	}
+
+	public int NextCard() {
+		if (ncards <= 0)
+			return -1;
+
+		int rval;
+
+		do {
+			rval = random.nextInt();
+			rval = Math.abs(rval % 52);
+		} while (cards[rval]);
+
+		cards[rval] = true;
+		ncards--;
+
+		return rval;
+	}
+}

@@ -1,0 +1,271 @@
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
+import javax.microedition.lcdui.game.*;
+
+public class smGame {
+
+	static final int[] styles = { Font.STYLE_PLAIN, Font.STYLE_BOLD,
+			Font.STYLE_ITALIC };
+
+	static final int[] sizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM,
+			Font.SIZE_LARGE };
+
+	static final int[] faces = { Font.FACE_SYSTEM, Font.FACE_MONOSPACE,
+			Font.FACE_PROPORTIONAL };
+
+	public static int NOSTAND = 0;
+
+	public static int STAND = 1;
+
+	public static int LOST = 2;
+
+	public static int WIN = 3;
+
+	public static int NOPLAY = 4;
+
+	private smMain midlet;
+
+	private int[] cards = new int[16];
+
+	private int ncards, bet, sum, status;
+
+	private int sc_ColumnCards;
+
+	private Image club, diamond, heart, spade;
+
+    private Sprite sp;
+
+	public smGame(smMain m) {
+		midlet = m;
+		ncards = bet = sum = status = 0;
+
+		if (midlet.CheckOption(0)) {
+			try {
+				club = Image.createImage("/club.png");
+				diamond = Image.createImage("/diamond.png");
+				heart = Image.createImage("/heart.png");
+				spade = Image.createImage("/spade.png");
+			
+                sp = new Sprite(Image.createImage("/naipes.png"), 19, 25);
+           
+                
+                    
+                System.out.println("Sprites: " + sp.getFrameSequenceLength());
+
+            } catch (Exception ioe) {
+				System.out.println("Error al cargar archivo de imagen");
+			}
+		}
+	}
+
+	public void SetColumnCards(int cards) {
+		sc_ColumnCards = cards;
+	}
+
+	public int AddCard(int card) {
+		if (ncards > 15)
+			return -1;
+		if (sum > 75)
+			return -1;
+
+		cards[ncards] = card;
+		ncards++;
+		sum += CardValue(card);
+		if (sum > 75)
+			status = LOST;
+		return sum;
+	}
+
+	public int DeleteLastCard() {
+		if (ncards <= 0)
+			return -1;
+
+		ncards--;
+		sum -= CardValue(cards[ncards]);
+		return cards[ncards];
+	}
+
+	public int CardValue(int card) {
+		int val = card % 13; // 1..10 J Q K
+
+		val++;
+
+		if (val >= 10)
+			return 5; // 0.5
+		else
+			return (val * 10);
+	}
+
+	public int SetStand() {
+		if (status == NOSTAND) {
+			status = STAND;
+			return 0;
+		} else {
+			return -1;
+		}
+	}
+
+	public int SetNoplay() {
+		if (IsNoPlay()) {
+			status = NOPLAY;
+			return 0;
+		} else
+			return -1;
+	}
+
+	public int GetStatus() {
+		return status;
+	}
+
+	public int Validate(int ndealer) {
+
+		if (status == STAND) {
+			if (ndealer >= sum)
+				status = LOST;
+			else
+				status = WIN;
+		}
+
+		return status;
+
+	}
+
+	public void SetBet(int b) {
+		bet = b;
+	}
+
+	public int GetBet() {
+		return bet;
+	}
+
+	public int GetSum() {
+		return sum;
+	}
+	
+    public int GetNCards() {
+		return ncards;
+	}
+
+	public boolean IsDead() { // 7 ?
+		return (ncards == 1 && sum == 70);
+	}
+
+	public boolean IsDeadEnd() {
+		return (ncards == 2 && sum == 75 && CardValue(cards[0]) == 70 && CardValue(cards[1]) == 5);
+	}
+
+	public boolean IsHalf() { // 0.5 ?
+		return (ncards == 1 && sum == 5);
+	}
+
+	public boolean IsNoPlay() { // 0.5 ?
+		return (ncards == 1 && sum == 30);
+	}
+
+	public boolean IsChangeCard() { // 0.5 ?
+		return (ncards == 1 && sum == 40);
+	}
+
+	public boolean IsEnd() {
+		return (sum > 50);
+	}
+
+	public void PrintCanvas(Graphics g, int dx, boolean iscursor) {
+		int i = 0;
+
+		if (ncards <= sc_ColumnCards) {
+			for (i = 0; i < ncards; i++) {
+				g.setColor(0x000000);
+				PrintCard(g, cards[i], dx, 17 + i * 15);
+			}
+			if (iscursor && false)
+				g.fillRect(dx, 20 + i * 15, 15, 3);
+		} else {
+			for (i = 0; i < ncards; i++) {
+				g.setColor(0x000000);
+				PrintCard(g, cards[i], dx, 17 + i * 5);
+			}
+			if (iscursor && false)
+				g.fillRect(dx, 30 + i * 5, 15, 3);
+		}
+
+	}
+
+	private void PrintCard(Graphics g, int card, int dx, int dy) {
+	
+        sp.setPosition(dx, dy);    
+        sp.setFrame(card);
+        sp.paint(g); 
+        
+        if (true) return;
+        Font font = null;
+		Image image = null;
+		String nc = "";
+
+		if (status == LOST)
+			g.setColor(0x88FF88);
+		else;
+			g.setColor(0xFFFFFF);
+
+		g.fillRoundRect(dx, dy, 15, 20, 0, 0);
+
+		if (status == LOST)
+			g.setColor(0x888888);
+		else
+			g.setColor(0x000000);
+		g.drawRoundRect(dx, dy, 15, 20, 0, 0);
+
+		if (CardValue(card) != 5) {
+			nc = "" + CardValue(card) / 10;
+		} else {
+			switch (card % 13) {
+			case 9:
+				nc = "10";
+				break;
+			case 10:
+				nc = "J";
+				break;
+			case 11:
+				nc = "Q";
+				break;
+			case 12:
+				nc = "K";
+				break;
+			}
+		}
+
+		if (midlet.CheckOption(0) && status != LOST) {
+
+			switch (card / 13) {
+			case 0:
+				image = club;
+				break;
+			case 1:
+				image = diamond;
+				break;
+			case 2:
+				image = heart;
+				break;
+			case 3:
+				image = spade;
+				break;
+			}
+
+			try {
+				g.drawImage(image, dx + 8, dy + 10, Graphics.TOP | Graphics.LEFT);
+			} catch (Exception ioe) {
+				System.out.println("Error al pintar imagen");
+			}
+		}
+
+		if (status == LOST)
+			g.setColor(0x888888);
+		else
+			g.setColor(0x000000);
+
+		font = Font.getFont(faces[0], styles[0], sizes[0]);
+		g.setFont(font);
+		g.drawString(nc, dx + 2, dy + 2, (Graphics.TOP | Graphics.LEFT));
+	}
+}

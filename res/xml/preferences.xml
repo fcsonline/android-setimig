@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <CheckBoxPreference
+                        android:title="Sounds effects"
+                        android:defaultValue="false"
+                        android:summary="Activate the sound efects in the game"
+                        android:key="soundEffectsPref" />
+        <CheckBoxPreference
+                        android:title="Remember bet"
+                        android:defaultValue="false"
+                        android:summary="Remeber bet between games"
+                        android:key="rememberBetPref" />
+        <CheckBoxPreference
+                        android:title="Stand on 7,5"
+                        android:defaultValue="false"
+                        android:summary="Stand automaticly on 7,5"
+                        android:key="stand75Pref" />
+        <CheckBoxPreference
+                        android:title="Show dealer game"
+                        android:defaultValue="false"
+                        android:summary="Show the dealer game at the end of your game"
+                        android:key="dealerGamePref" />
+        <EditTextPreference
+                android:name="Username"
+                android:summary="Set the username in the game"
+                android:defaultValue="User"
+                android:title="Username"
+                android:key="usernamePref" />
+        <ListPreference
+                        android:title="Time Limit"
+                        android:summary="Set  the timeout in timed games"
+                        android:key="timeoutPref"
+                        android:defaultValue="600"
+                        android:entries="@array/listTimeoutArray"
+                        android:entryValues="@array/listTimeoutValues" />                
+
+</PreferenceScreen>

@@ -1,0 +1,90 @@
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.microedition.io.Connector;
+import javax.microedition.io.HttpConnection;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
+
+public class smRecords extends Form implements CommandListener {
+
+	private smMain midlet;
+
+	private Command exitCommand = null;
+
+	private Command sendCommand = null;
+
+	private static String RECORDSURL = "http://nyullsoft.cjb.net/~fcs/altres/setimig/add.php";
+
+	public smRecords(smMain m) {
+		super("Send Records");
+
+		midlet = m;
+
+		sendCommand = new Command("Send", Command.OK, 1);
+		exitCommand = new Command("Return", Command.EXIT, 1);
+		this.addCommand(sendCommand);
+		this.addCommand(exitCommand);
+		this.append("");
+		this.setCommandListener(this);
+	}
+
+	public void commandAction(Command c, Displayable s) {
+
+		if (c == exitCommand)
+			midlet.StartGame();
+		if (c == sendCommand)
+			try {
+				SendRecords();
+			} catch (Exception e) {
+				System.out.println("Error Records");
+			}
+	}
+
+	public void SendRecords() throws IOException {
+		HttpConnection c = null;
+		InputStream is = null;
+		StringBuffer b = new StringBuffer();
+		try {
+
+			this.append("Connecting...\n");
+			c = (HttpConnection) Connector.open(RECORDSURL + "?name="
+					+ midlet.playerId + "&easy=" + midlet.records[0]
+					+ "&normal=" + midlet.records[1] + "&dificult="
+					+ midlet.records[2] + "&desd=" + midlet.records[5]
+					+ "&csum=" + CheckSum());
+
+			this.append("Connected\n");
+			this.append("Sending records...\n");
+
+			c.setRequestMethod(HttpConnection.GET);
+			c.setRequestProperty("User-Agent",
+					"Profile/MIDP-1.0 Configuration/CLDC-1.0");
+			c.setRequestProperty("Content-Language", "es-ES");
+			is = c.openInputStream();
+			int ch;
+
+			while ((ch = is.read()) != -1)
+				b.append((char) ch);
+
+			this.append(b.toString() + "\n");
+
+		} catch (Exception e) {
+			this.append("Client Error!\n");
+		} finally {
+			if (is != null)
+				is.close();
+			if (c != null)
+				c.close();
+			this.append("Disconnected\n");
+		}
+	}
+
+	int CheckSum() {
+		return (midlet.records[0] + midlet.records[1] * 2
+				+ midlet.records[2] * 3 + midlet.records[5] * 4) % 1001;
+	}
+
+}

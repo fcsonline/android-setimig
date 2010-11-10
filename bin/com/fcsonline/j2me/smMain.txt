@@ -1,0 +1,516 @@
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+
+import java.util.Vector;
+
+import javax.microedition.lcdui.ChoiceGroup;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Display;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Form;
+import javax.microedition.lcdui.Item;
+import javax.microedition.lcdui.ItemStateListener;
+import javax.microedition.lcdui.List;
+import javax.microedition.lcdui.StringItem;
+import javax.microedition.lcdui.TextField;
+import javax.microedition.midlet.MIDlet;
+import javax.microedition.rms.RecordStore;
+import javax.microedition.io.*;
+
+public class smMain extends MIDlet implements CommandListener, ItemStateListener {
+	private Display display;
+
+	private Vector players;
+
+    private smPlayer player;
+    
+    private smDealer dealer;
+
+	private smSplash splash;
+
+	private smRecords updateRecords;
+                
+    private smServer server;
+    
+    private smClient client;
+
+	private Form inst = null;
+	
+    private List room = null;
+
+	private List StartList = null;
+
+	private ChoiceGroup optionList = null;
+	
+    private ChoiceGroup levelList = null;
+
+	private TextField PlayerTimeOut = null;
+	
+	private TextField PlayerName = null;
+
+	private TextField PlayerId = null;
+
+	private Command exitCommand = null;
+
+	private Command saveCommand = null;
+
+	private Command createCommand = null;
+
+	private RecordStore rs = null;
+
+	public int GeneralOptions = 0;
+
+	public boolean Continue = false;
+	
+    public boolean FirstExecution = true;
+
+	public int records[] = new int[6];
+	
+    public int level = 0;
+	
+	public String playerName = "YOU";
+	
+	public String playerId;
+	
+	public String playerTimeOut;
+
+	private static int NUM_OPTIONS = 5;
+
+	private static int DEFAULT_TIMEOUT = 180;
+    
+    public static final int VERSION = 202;
+	
+	private static String RECORDSTOTE_NAME = "setimig";
+	
+	public smMain() {
+		display = Display.getDisplay(this);
+        players = new Vector();
+	}
+
+	public void startApp() {
+
+		LoadConfig();
+
+		try {
+			splash = new smSplash(this);
+			display.setCurrent(splash);
+		} catch (Exception ioe) {
+			System.out.println(ioe);
+		}
+
+	}
+
+	public void pauseApp() {
+	}
+
+	public void destroyApp(boolean unconditional) {
+		SaveConfig();
+		notifyDestroyed();
+	}
+
+	public void commandAction(Command c, Displayable s) {
+
+		if (c == exitCommand){
+			StartGame();
+		}else if (c == saveCommand) {
+			boolean[] flags = new boolean[NUM_OPTIONS];
+			optionList.getSelectedFlags(flags);
+			
+            level = levelList.getSelectedIndex();
+
+			GeneralOptions = 0;
+
+			for (int i = 0; i < NUM_OPTIONS; i++)
+				if (flags[i])
+					GeneralOptions = GeneralOptions | (1 << i);
+
+			playerName = PlayerName.getString();
+			playerId = PlayerId.getString();
+			playerTimeOut = PlayerTimeOut.getString();
+			
+			SaveConfig();
+			StartGame();
+
+		}else if (c == createCommand) {
+	
+            try{
+                
+                for (int i = 0; i < players.size(); i++) {
+                    smPlayerRemote pr = (smPlayerRemote)players.elementAt(i);
+                    pr.send("2");
+                }
+
+				player = (smPlayer) players.elementAt(1);
+				display.setCurrent(player);
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
+		} else {
+			int k = 0;
+			if (Continue)
+				k--;
+
+			switch (StartList.getSelectedIndex() + k) {
+			case -1:
+				player.SetContinue();
+				display.setCurrent(player);
+				break;
+			case 0:
+
+                players.removeAllElements();
+				player = new smPlayer(this, dealer, playerName, level, Integer.parseInt(playerTimeOut));
+				display.setCurrent(player);
+                players.addElement(player);
+                
+                break;
+			
+            case 1:
+                
+                players.removeAllElements();
+
+                createCommand = new Command("Start", Command.EXIT, 0);
+                exitCommand = new Command("Return", Command.BACK, 1);
+                
+				room = new List("Bluetooth Room", List.IMPLICIT);
+				room.addCommand(createCommand);
+				room.addCommand(exitCommand);
+				room.setCommandListener(this);
+				display.setCurrent(room);
+                
+                room.append(playerName, null);
+
+                smPlayerRemote playerRemote = new smPlayerRemote(this, dealer, playerName, null, null, null);
+                players.addElement(playerRemote);
+                
+                server = new smServer(this);
+                server.startServer();
+
+				break;
+
+			case 2:
+                
+                players.removeAllElements();
+                
+                exitCommand = new Command("Return", Command.BACK, 1);
+                
+				room = new List("Bluetooth Room", List.IMPLICIT);
+				room.addCommand(exitCommand);
+				room.setCommandListener(this);
+				display.setCurrent(room);
+                
+                client = new smClient(this);
+                client.startClient();
+
+				break;
+
+			case 3:
+
+				exitCommand = new Command("Return", Command.BACK, 2);
+				inst = new Form("Rules");
+				inst.append(new StringItem("", "The goal is to get a 7.5. Once you get your first card you should bet.\n\nKeys:\n· 2 Increase bet\n· 8 Decrease bet\n· 5 Hit a card\n· 6 Stop\n· 4 Special key for the first card given.\n\nSpecial key:\n If you get a 3, you can choose to not to play. If you get a 4 you can choose to change such card. If you get a half next to another you can choose to 'Desdoblar'. If you get a 7 you can choose to 'Muerto' (7+0,5).\n\nScore:\n· Low -x1\n· High x1\n· 7,5 x2\n· Muerto x3"));
+				inst.addCommand(exitCommand);
+				inst.setCommandListener(this);
+				display.setCurrent(inst);
+
+				break;
+
+			case 4:
+
+				exitCommand = new Command("Return", Command.BACK, 2);
+				inst = new Form("Records");
+				inst.append(new StringItem("", "Easy: $" + records[0] + "\n"));
+				inst.append(new StringItem("", "Normal: $" + records[1] + "\n"));
+				inst.append(new StringItem("", "Dificult: $" + records[2] + "\n"));
+				inst.append(new StringItem("", "Max Lost: $" + records[3] + "\n"));
+				inst.append(new StringItem("", "Max Win: $" + records[4] + "\n"));
+				inst.append(new StringItem("", "Max Desd: " + records[5] + "\n"));
+				inst.addCommand(exitCommand);
+				inst.setCommandListener(this);
+				display.setCurrent(inst);
+
+				break;
+
+			case 5:
+
+				try {
+					//boolean[] flags = new boolean[NUM_OPTIONS];
+
+					Form Fopt = new Form("Settings");
+					
+                    String [] levels = {"Easy", "Normal", "Dificult"};
+
+                    levelList = new ChoiceGroup("Level", ChoiceGroup.POPUP, levels, null);
+                    
+                    levelList.setSelectedIndex(level, true);
+
+					optionList = new ChoiceGroup("", List.MULTIPLE);
+					optionList.append("Load Images", null);
+					optionList.append("Remember Bet", null);
+					optionList.append("Show Messages", null);
+					optionList.append("Stand on 7,5", null);
+					optionList.append("Dealer Game", null);
+
+					for (int i = 0; i < NUM_OPTIONS; i++)
+						optionList.setSelectedIndex(i,
+								((GeneralOptions & (1 << i)) != 0));
+
+					saveCommand = new Command("Save", Command.EXIT, 0);
+					exitCommand = new Command("Return", Command.BACK, 1);
+					PlayerName = new TextField("\nPlayer Name", playerName, 20, 0);
+					PlayerId = new TextField("Player ID", playerId, 20, 0);
+					PlayerTimeOut = new TextField("Time Limit(s)", playerTimeOut, 20, 0);
+					Fopt.append(levelList);
+					Fopt.append(optionList);
+					Fopt.append(PlayerName);
+					Fopt.append(PlayerId);
+					Fopt.append(PlayerTimeOut);
+					Fopt.addCommand(saveCommand);
+					Fopt.addCommand(exitCommand);
+
+					Fopt.setCommandListener(this);
+					display.setCurrent(Fopt);
+
+				} catch (Exception ioe) {
+					System.out.println(ioe);
+				}
+
+				break;
+
+			case 6:
+				updateRecords = new smRecords(this);
+				display.setCurrent(updateRecords);
+				break;
+
+			case 7:
+				exitCommand = new Command("Return", Command.BACK, 2);
+				Form credits = new Form("About");
+				credits.append(new StringItem("", "Created by FCS\nTest by EQ & ALX\nnyullsoft 2007\nnyullsoft.cjb.net\nVersion: " + VERSION));
+				credits.addCommand(exitCommand);
+				credits.setCommandListener(this);
+				display.setCurrent(credits);
+				break;
+
+			case 8:
+				destroyApp(true);
+				break;
+			}
+		}
+	}
+
+	public void StartGame() {
+
+		splash = null;
+		inst = null;
+
+        dealer = new smDealer();
+
+		try {
+			StartList = new List("Options", List.IMPLICIT);
+
+			if (Continue)
+				StartList.append("Continue", null);
+
+			StartList.append("Play", null);
+			StartList.append("Create room", null);
+			StartList.append("Enter to room", null);
+			StartList.append("Rules", null);
+			StartList.append("Records", null);
+			StartList.append("Settings", null);
+			StartList.append("Send Records", null);
+			StartList.append("About", null);
+			StartList.append("Exit", null);
+			StartList.setCommandListener(this);
+			display.setCurrent(StartList);
+
+		} catch (Exception ioe) {
+			System.out.println(ioe);
+		}
+	}
+
+	public void itemStateChanged(Item item) {
+		System.out.println("Inside itemStateChangeds()");
+	}
+
+    public boolean getFirstExecution(){
+        return FirstExecution;
+    }
+    
+    public void setFirstExecution(boolean b){
+        FirstExecution = b;
+    }
+
+	public void LoadConfig() {
+		try {
+			rs = RecordStore.openRecordStore(RECORDSTOTE_NAME, true);
+
+			if (rs.getNumRecords() != 1) {
+				rs.closeRecordStore();
+				ResetConfig();
+			}
+
+			ByteArrayInputStream buffer = new ByteArrayInputStream(rs.getRecord(1));
+			DataInputStream dis = new DataInputStream(buffer);
+
+			try {
+
+				records[0] = dis.readInt();
+				records[1] = dis.readInt();
+				records[2] = dis.readInt();
+				records[3] = dis.readInt();
+				records[4] = dis.readInt();
+				records[5] = dis.readInt();
+
+				GeneralOptions = dis.readInt();
+				
+                level = dis.readInt();
+				
+				playerName = dis.readUTF();
+				playerId = dis.readUTF();
+				playerTimeOut = String.valueOf(dis.readInt());
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} catch (Exception e) {
+			System.err.println("LoadConfig: " + e.toString());
+		}
+	}
+
+	public void SaveConfig() {
+
+		try {
+			rs = RecordStore.openRecordStore(RECORDSTOTE_NAME, true);
+
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(buffer);
+			dos.writeInt(records[0]); // Easy
+			dos.writeInt(records[1]); // Normal
+			dos.writeInt(records[2]); // Dificult
+			dos.writeInt(records[3]); // Max. Lost
+			dos.writeInt(records[4]); // Max. Win
+			dos.writeInt(records[5]); // Max. Desdobles
+			
+			dos.writeInt(GeneralOptions); // Max. Desdobles
+			
+            dos.writeInt(level); // Level
+			
+			dos.writeUTF(playerName); // Name
+			dos.writeUTF(playerId); // ID
+			
+			try{
+				dos.writeInt(Integer.parseInt(playerTimeOut));	
+			}catch(Exception e){
+				playerTimeOut = String.valueOf(DEFAULT_TIMEOUT);
+				dos.writeInt(Integer.parseInt(playerTimeOut));
+			} 
+
+			byte[] data = buffer.toByteArray();
+			rs.setRecord(1, data, 0, data.length);
+			rs.closeRecordStore();
+		} catch (Exception e) {
+			System.err.println("SaveConfig: " + e.toString());
+		}
+	}
+	
+	public void ResetConfig() {
+		try {
+			RecordStore.deleteRecordStore(RECORDSTOTE_NAME);
+			rs = RecordStore.openRecordStore(RECORDSTOTE_NAME, true);
+
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			DataOutputStream dos = new DataOutputStream(buffer);
+			dos.writeInt(0); // Easy
+			dos.writeInt(0); // Normal
+			dos.writeInt(0); // Dificult
+			dos.writeInt(0); // Max. Lost
+			dos.writeInt(0); // Max. Win
+			dos.writeInt(0); // Max. Desdobles
+			
+			dos.writeInt(5); // Default Options: 00000101 -> "Load Images", "Show Messages"
+			
+            dos.writeInt(0); // Default Level -> "Easy"
+			
+			dos.writeUTF("YOU"); // Name
+			dos.writeUTF(""); // ID
+			dos.writeInt(DEFAULT_TIMEOUT); // Time 
+			
+			byte[] data = buffer.toByteArray();
+			rs.addRecord(data, 0, data.length);
+
+		} catch (Exception e) {
+			System.err.println("ResetConfig: " + e.toString());
+		}
+	}
+	
+	public boolean CheckOption(int i) {
+		return (GeneralOptions & (1 << i)) != 0;
+	}
+
+    public void clientDetected(StreamConnection connection, DataInputStream in, DataOutputStream out){
+        
+        try{
+
+            int v = in.readInt(); // Version
+            String s = in.readUTF(); // Name Client
+            System.out.println("Connected " + s + " version " + v);
+
+            if (v == v) { // Check valid version 
+
+                room.append(s, null);
+                
+                smPlayerRemote playerRemote = new smPlayerRemote(this, dealer, s, connection, in, out);
+                players.addElement(playerRemote);
+
+                out.writeInt(players.size());
+
+                for (int i = 0; i < players.size(); i++) {
+                    smPlayerRemote pr = (smPlayerRemote)players.elementAt(i);
+                    out.writeUTF(pr.getName());
+                }
+
+                out.flush();
+
+                for (int i = 0; i < players.size(); i++) {
+                    smPlayerRemote pr = (smPlayerRemote)players.elementAt(i);
+                    pr.send("1" + s);
+                }
+                
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void serverDetected(StreamConnection connection, DataInputStream in, DataOutputStream out){
+
+        try{
+
+            out.writeInt(VERSION);
+            out.writeUTF(playerName);
+            out.flush();
+
+            int count = in.readInt(); 
+
+            for (int i = 0; i < count; i++)
+            {
+                String playerName = in.readUTF();
+                room.append(playerName, null);
+            }
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+
+    }
+
+
+}

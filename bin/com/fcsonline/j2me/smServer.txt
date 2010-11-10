@@ -1,0 +1,65 @@
+import javax.bluetooth.*;
+import javax.microedition.io.*;
+import java.io.*;
+
+public class smServer implements Runnable {
+    public static final UUID SERVICE_ID = new UUID(0x8171);
+    private smMain listener;
+    private Thread thread;
+    private boolean quit = false;
+
+    public smServer(smMain l){
+        thread = new Thread(this);
+        listener = l;
+    }
+
+    public void startServer() {
+        thread.start();
+    }
+    
+    public void stopServer() {
+        quit = true;
+    }
+    
+    public void run() {
+        try {
+            LocalDevice localDevice = LocalDevice.getLocalDevice();
+
+            if(!localDevice.setDiscoverable(DiscoveryAgent.GIAC)) {
+                System.err.println("Imposible ofrecer un servicio");
+            }
+            
+            StringBuffer url = new StringBuffer("btspp://localhost:");
+            url.append(SERVICE_ID.toString() + ";name=SetImig Service;authorize=true");
+            StreamConnectionNotifier notifier = (StreamConnectionNotifier) Connector.open(url.toString());
+            System.out.println("Server up...");
+            StreamConnection connection = null;
+            DataInputStream in = null;
+            DataOutputStream out = null;
+
+            while(!quit) {
+                try {
+                    connection = notifier.acceptAndOpen();
+                    in = connection.openDataInputStream();
+                    out = connection.openDataOutputStream();
+                
+                    listener.clientDetected(connection, in, out);
+                
+                } catch(IOException e) {
+                    e.printStackTrace();
+                } 
+                /*finally {
+                    try {
+                        if(in != null) in.close();
+                        if(out != null) out.close();
+                        if(connection != null) connection.close();
+                    } catch(IOException e) {}
+                }*/
+            }
+        } catch(IOException e) {
+            e.printStackTrace();
+            System.err.println("Error: " + e);
+        }
+    }
+}
+

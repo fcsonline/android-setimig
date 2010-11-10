@@ -1,0 +1,84 @@
+import javax.microedition.lcdui.Canvas;
+import javax.microedition.lcdui.Command;
+import javax.microedition.lcdui.CommandListener;
+import javax.microedition.lcdui.Displayable;
+import javax.microedition.lcdui.Font;
+import javax.microedition.lcdui.Graphics;
+import javax.microedition.lcdui.Image;
+
+public class smSplash extends Canvas implements CommandListener {
+
+	static final int[] styles = { Font.STYLE_PLAIN, Font.STYLE_BOLD,
+			Font.STYLE_ITALIC };
+
+	static final int[] sizes = { Font.SIZE_SMALL, Font.SIZE_MEDIUM,
+			Font.SIZE_LARGE };
+
+	static final int[] faces = { Font.FACE_SYSTEM, Font.FACE_MONOSPACE,
+			Font.FACE_PROPORTIONAL };
+
+	private Command exitCommand;
+
+	private Command startCommand;
+
+	private smMain midlet;
+
+	private Image logo = null;
+
+	public smSplash(smMain m) {
+		midlet = m;
+		exitCommand = new Command("Exit", Command.EXIT, 0);
+		startCommand = new Command("Start", Command.OK, 0);
+		addCommand(exitCommand);
+		addCommand(startCommand);
+
+		try {
+			logo = Image.createImage("/logo.png");
+		} catch (Exception e) {
+			System.out.println("Error al cargar archivo de imagen");
+		}
+		repaint();
+
+		setCommandListener(this);
+	}
+
+	public void paint(Graphics g) {
+
+		try {
+			if (getWidth() > 128 || getHeight() > 128) {
+				g.setColor(0x05614C);
+				g.fillRect(0, 0, getWidth(), getHeight());
+				g.drawImage(logo, getWidth() / 2, getHeight() / 2, Graphics.VCENTER
+						| Graphics.HCENTER);
+			} else {
+				g.drawImage(logo, 0, 0, Graphics.TOP | Graphics.LEFT);
+			}
+
+			g.setColor(0xFFFFFF);
+			g.setFont(Font.getFont(faces[0], styles[0], sizes[0]));
+            
+            String textVersion = Integer.toString(midlet.VERSION / 100) + "." + Integer.toString((midlet.VERSION % 100) / 10) + "." + Integer.toString(midlet.VERSION % 10);
+
+			g.drawString("v" + textVersion, getWidth() - 5, 5, Graphics.TOP | Graphics.RIGHT);
+		} catch (Exception ioe) {
+			System.out.println(ioe);
+		}
+	}
+
+	public void commandAction(Command c, Displayable s) {
+		if (c == exitCommand) {
+			midlet.destroyApp(true);
+		}
+
+		if (c == startCommand) {
+			midlet.StartGame();
+		}
+	}
+    
+    public void pointerPressed(int x, int y){
+    
+        commandAction(startCommand, null);
+        
+    }
+
+}
