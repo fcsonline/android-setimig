@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -24,7 +26,12 @@ import com.fcsonline.android.core.Player;
 
 public class MainScreen extends Activity {
 
+	protected static final long DOUBLE_CLICK_MILLIS = 500;
+
 	Controller controller;
+	
+	long lastClick;
+	int  countClick;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -51,25 +58,33 @@ public class MainScreen extends Activity {
 		
 		((Button) findViewById(R.id.ButtonDown)).setTypeface(font);
 		((Button) findViewById(R.id.ButtonUp)).setTypeface(font);
-		((Button) findViewById(R.id.ButtonMore)).setTypeface(font);
 		((Button) findViewById(R.id.ButtonStand)).setTypeface(font);
 		((Button) findViewById(R.id.ButtonSpecial)).setTypeface(font);
 		
 	}
 
 	private void initializeController() {
+
+		lastClick = 0;
+		
+		// Core objects
 		Dealer dealer = new Dealer();
 		Player player = new Player();
 		
-		// TODO: Constanize
-		int spriteWidth = 19 * 3;
-		int spriteHeight = 25 * 3;
+		// Sprite Cards
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+		opts.inDensity = 1;
+		opts.inTargetDensity = 0;
+		opts.inScreenDensity = 1;
+		opts.inScaled = false;
+
+		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.raw.naipes, opts);
+		int spriteWidth = bitmap.getWidth() / 13; // A, 2, ..., Q, K
+		int spriteHeight = bitmap.getHeight() / 4; // h, c, d, s 
 		
 		LinearLayout layout = (LinearLayout)findViewById(R.id.LinearLayout01);
-		ImageProvider imageProvider = new ImageProvider(getResources(), R.raw.naipes, spriteWidth, spriteHeight);
+		ImageProvider imageProvider = new ImageProvider(bitmap, spriteWidth, spriteHeight);
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		
-		
 		
 		controller = new Controller();
 		
@@ -80,6 +95,9 @@ public class MainScreen extends Activity {
 		controller.setTextViewSum((TextView)findViewById(R.id.TextViewSum));
 		controller.setTextViewBet((TextView)findViewById(R.id.TextViewBet));
 		controller.setTextViewUserName((TextView)findViewById(R.id.TextViewUserName));
+		
+		controller.setButtonUp((Button)findViewById(R.id.ButtonUp));
+		controller.setButtonDown((Button)findViewById(R.id.ButtonDown));
 		controller.setButtonEspecial((Button)findViewById(R.id.ButtonSpecial));
 		
 		controller.setAssetsManager(getAssets());
@@ -87,6 +105,35 @@ public class MainScreen extends Activity {
 		controller.setImageProvider(imageProvider);
 
 		controller.setLevel(0); // TODO: Select from a screen
+		
+		controller.setOnClickListenerLayout(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				try {
+					long newClick = System.currentTimeMillis();
+					
+					if ((newClick - lastClick) < DOUBLE_CLICK_MILLIS) {
+						countClick++;
+					} else {
+						countClick = 1;
+					}
+					
+					lastClick = newClick;
+					
+					// DoubleClick!
+					if (countClick == 2) {
+						controller.next();
+						controller.paint();
+						countClick = 1;
+					}
+					
+				} catch (Exception e) {
+					Toast toast = Toast.makeText(getApplicationContext(), "More:" + e.getMessage(), Toast.LENGTH_SHORT);
+					toast.show();
+					e.printStackTrace();
+				}
+			}
+		});
 		
 		controller.init();
 	}
@@ -166,15 +213,6 @@ public class MainScreen extends Activity {
 	}
 	
 	private void initializeButtons() {
-
-		LinearLayout layout = (LinearLayout)findViewById(R.id.LinearLayout01);
-		layout.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast toast = Toast.makeText(getApplicationContext(), "Jejeje", Toast.LENGTH_SHORT);
-				toast.show();
-			}
-		});
 		
 		Button buttonUp = (Button)findViewById(R.id.ButtonUp);
 		
@@ -204,22 +242,6 @@ public class MainScreen extends Activity {
 					controller.paint();
 				} catch (Exception e) {
 					Toast toast = Toast.makeText(getApplicationContext(), "Stand:" + e.getMessage(), Toast.LENGTH_SHORT);
-					toast.show();
-					e.printStackTrace();
-				}
-			}
-		});
-		
-		Button buttonMore = (Button)findViewById(R.id.ButtonMore);
-		
-		buttonMore.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				try {
-					controller.next();
-					controller.paint();
-				} catch (Exception e) {
-					Toast toast = Toast.makeText(getApplicationContext(), "More:" + e.getMessage(), Toast.LENGTH_SHORT);
 					toast.show();
 					e.printStackTrace();
 				}

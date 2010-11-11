@@ -5,26 +5,36 @@
     android:layout_height="fill_parent" android:background="#05614c">
 
 
-<LinearLayout android:id="@+id/LinearLayout03" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
-<TextView android:text="@+id/TextViewMoney" android:id="@+id/TextViewMoney" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textSize="25px"></TextView>
-<TextView android:text="@+id/TextViewSum" android:id="@+id/TextViewSum" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textStyle="bold" android:textSize="25px"></TextView>
-<TextView android:text="@+id/TextViewBet" android:id="@+id/TextViewBet" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textSize="25px"></TextView>
-<TextView android:text="@+id/TextViewUserName" android:id="@+id/TextViewUserName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingRight="10sp" android:textSize="25px"></TextView>
-</LinearLayout>
+<TableLayout android:layout_width="fill_parent" android:layout_height="wrap_content" android:stretchColumns="1">
+    <TableRow>
+        <TextView android:text="@+id/TextViewMoney" android:id="@+id/TextViewMoney" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:padding="3dip" android:gravity="left" android:textSize="25px"></TextView>
+		<TextView android:text="@+id/TextViewUserName" android:id="@+id/TextViewUserName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:padding="3dip" android:gravity="right" android:textSize="15px"></TextView>
+    </TableRow>
+</TableLayout>
 
-<LinearLayout android:id="@+id/LinearLayout02" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
-<Button android:text="Up" android:id="@+id/ButtonUp" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="Down" android:id="@+id/ButtonDown" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="Stand!" android:id="@+id/ButtonStand" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="More!" android:id="@+id/ButtonMore" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-<Button android:text="ESPECIAL!" android:id="@+id/ButtonSpecial" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
-</LinearLayout>
-
-
-<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
+<LinearLayout android:id="@+id/LinearLayout01" android:layout_weight="4" android:background="#15413c" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="horizontal" android:gravity="center_horizontal">
 
 </LinearLayout>
 
+<LinearLayout android:id="@+id/LinearLayout02" android:layout_weight="1" android:minHeight="50dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_horizontal">
 
+	<LinearLayout android:id="@+id/LinearLayout04" android:layout_weight="1" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:gravity="fill_vertical">
+		<Button android:text="▲" android:id="@+id/ButtonUp" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+		<Button android:text="▼" android:id="@+id/ButtonDown" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+	</LinearLayout>
+	
+	<LinearLayout android:id="@+id/LinearLayout04" android:layout_weight="1" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:gravity="center">
+		<TextView android:text="@+id/TextViewBet" android:id="@+id/TextViewBet" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#000000" android:padding="3dip" android:gravity="left" android:textSize="20px"></TextView>
+		<TextView android:text="@+id/TextViewSum" android:id="@+id/TextViewSum" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#cccccc" android:padding="3dip" android:gravity="left" android:textStyle="bold" android:textSize="20px"></TextView>
+	</LinearLayout>
+		
+	<LinearLayout android:id="@+id/LinearLayout04" android:layout_weight="1" android:layout_width="fill_parent" android:layout_height="fill_parent" android:orientation="vertical" android:gravity="fill_vertical">
+		<Button android:text="Stand!" android:id="@+id/ButtonStand" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+		<Button android:text="Spc!" android:id="@+id/ButtonSpecial" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+	</LinearLayout>
+
+
+
+</LinearLayout>
 
 </LinearLayout>

@@ -5,6 +5,7 @@ import java.util.Vector;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,12 +29,15 @@ public class Controller {
 	TextView textViewBet;
 	TextView textViewUserName;
 	
+	Button buttonUp;
+	Button buttonDown;
 	Button buttonEspecial;
 	
 	AssetManager assetsManager;
 	SharedPreferences preferences;
 	
-	// FIXME: PROVISIONAL
+	OnClickListener listenerLayout;
+
 	Vector<LinearLayout> gamesLayouts;
 	
 	int level;
@@ -42,10 +46,21 @@ public class Controller {
 		super();
 	}
 
-	public void init (){
+	public void init () {
+		
+		layout.setOnClickListener(listenerLayout);
+		
 		player.setPlayerName(preferences.getString("usernamePref", "User"));
 		textViewUserName.setText(player.getName());
 		reset();
+		
+		try {
+			next();
+			paint();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // Some card please!
 	}
 	
 	public void paint() throws Exception {
@@ -90,6 +105,7 @@ public class Controller {
 		LinearLayout gameLayout = new LinearLayout(layout.getContext());
 		gameLayout.setOrientation(LinearLayout.VERTICAL);
 		layout.addView(gameLayout);
+		layout.setOnClickListener(listenerLayout);
 		gamesLayouts.add(gameLayout);
 		
 	}
@@ -106,9 +122,11 @@ public class Controller {
 		
 		Game game = player.getCurrent();
 		
-		textViewMoney.setText("" + player.getMoney());
+		textViewMoney.setText("$" + player.getMoney());
 		textViewSum.setText("" + game.getSum());
-		textViewBet.setText("" + game.getBet());
+		textViewBet.setText("$" + game.getBet());
+		buttonUp.setEnabled(game.getBet() < 25);
+		buttonDown.setEnabled(game.getBet() > 1);
 		
 		if (game.isLost()) {
 			stand();
@@ -129,6 +147,7 @@ public class Controller {
 				buttonEspecial.setEnabled(true);
 			} 
 		}
+		
 	}
 	
 	public void stand() throws Exception {
@@ -160,6 +179,13 @@ public class Controller {
 			}
 			
 			checkRecords();
+		} else {
+			Game game = player.getCurrent();
+			
+			if (game != null){
+				buttonUp.setEnabled(game.getBet() < 25);
+				buttonDown.setEnabled(game.getBet() > 1); 
+			}
 		}
 	}
 	
@@ -219,19 +245,25 @@ public class Controller {
 		}
 		
 		player.setMoney(player.getMoney() + lastmoney);
-		textViewMoney.setText("" + player.getMoney());
+		textViewMoney.setText("$" + player.getMoney());
 	}
 
 	public void up() {
 		Game game = player.getCurrent();
-		game.setBet(game.getBet() + 5);
-		textViewBet.setText("" + game.getBet());
+		game.setBet(Math.min(game.getBet() + 5, 25));
+		textViewBet.setText("$" + game.getBet());
+		
+		buttonUp.setEnabled(game.getBet() < 25);
+		buttonDown.setEnabled(game.getBet() > 1); 
 	}
 
 	public void down() {
 		Game game = player.getCurrent();
-		game.setBet(game.getBet() - 1);
-		textViewBet.setText("" + game.getBet());
+		game.setBet(Math.max(game.getBet() - 1, 1));
+		textViewBet.setText("$" + game.getBet());
+		
+		buttonUp.setEnabled(game.getBet() < 25);
+		buttonDown.setEnabled(game.getBet() > 1); 
 	}
 	
 	public void especial() throws Exception {
@@ -260,6 +292,7 @@ public class Controller {
 			LinearLayout gameLayout = new LinearLayout(layout.getContext());
 			gameLayout.setOrientation(LinearLayout.VERTICAL);
 			layout.addView(gameLayout);
+			layout.setOnClickListener(listenerLayout);
 			gamesLayouts.add(gameLayout);
 		}
 	}
@@ -363,6 +396,14 @@ public class Controller {
 		this.textViewUserName = textViewUserName;
 	}
 
+	public void setButtonUp(Button buttonUp) {
+		this.buttonUp = buttonUp;
+	}
+
+	public void setButtonDown(Button buttonDown) {
+		this.buttonDown = buttonDown;
+	}
+
 	public void setButtonEspecial(Button buttonEspecial) {
 		this.buttonEspecial = buttonEspecial;
 	}
@@ -377,6 +418,10 @@ public class Controller {
 
 	public void setLevel(int level) {
 		this.level = level;
+	}
+
+	public void setOnClickListenerLayout(OnClickListener onClickListener) {
+		listenerLayout = onClickListener;
 	}
 	
 }
