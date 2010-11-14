@@ -12,4 +12,33 @@
     <string name="instructions">
     The goal is to get a 7.5. Once you get your first card you should bet. Options:\n- Increase bet\n- Decrease bet\n\nThen you can:\n- Hit a card\n- Stand\n- Special key for the first card given.\n\nSpecial key:\nIf you get a 3, you can choose to not to play. If you get a 4 you can choose to change such card. If you get a half next to another you can choose to \'Split\'. If you get a 7 you can choose to \'Dead\' (7+0,5).\n\nScore:\n� Low -x1\n� High x1\n� 7,5 x2\n� Dead x3
     </string>
+    
+    <string name="score_l1_hs_key">High Score Level 1</string>
+	<string name="score_l1_hs_val">$0</string>
+	<string name="score_l1_mw_key">Max Win Hand Level 1</string>
+	<string name="score_l1_mw_val">$0</string>
+	<string name="score_l1_ml_key">Max Lost Hand Level 1</string>
+	<string name="score_l1_ml_val">$0</string>
+	<string name="score_l1_sp_key">Max Splits Level 1</string>
+	<string name="score_l1_sp_val">0</string>
+	
+	<string name="score_l2_hs_key">High Score Level 2</string>
+	<string name="score_l2_hs_val">$0</string>
+	<string name="score_l2_mw_key">Max Win Hand Level 2</string>
+	<string name="score_l2_mw_val">$0</string>
+	<string name="score_l2_ml_key">Max Lost Hand Level 2</string>
+	<string name="score_l2_ml_val">$0</string>
+	<string name="score_l2_sp_key">Max Splits Level 2</string>
+	<string name="score_l2_sp_val">0</string>
+	
+	<string name="score_l3_hs_key">High Score Level 3</string>
+	<string name="score_l3_hs_val">$0</string>
+	<string name="score_l3_mw_key">Max Win Hand Level 3</string>
+	<string name="score_l3_mw_val">$0</string>
+	<string name="score_l3_ml_key">Max Lost Hand Level 3</string>
+	<string name="score_l3_ml_val">$0</string>
+	<string name="score_l3_sp_key">Max Splits Level 3</string>
+	<string name="score_l3_sp_val">0</string>
+	    
+    
 </resources>

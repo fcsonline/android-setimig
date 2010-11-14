@@ -38,15 +38,15 @@ public class MainScreen extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
+		initialize();
+	}
+
+	private void initialize() {
 		initializeFonts();
 		initializeButtons();
 		initializeController();
-		
-		Toast toast = Toast.makeText(getApplicationContext(), "Welmcome to SetIMig!", Toast.LENGTH_SHORT);
-		toast.show();
-		
 	}
-
+	
 	private void initializeFonts() {
 		
 		Typeface font = Typeface.createFromAsset(getAssets(), "mailrays.ttf");
@@ -154,9 +154,27 @@ public class MainScreen extends Activity {
 		// Handle item selection
 	    switch (item.getItemId()) {
 	    case R.id.new_game:
-	    	Toast toast = Toast.makeText(getApplicationContext(), "Jejeje", Toast.LENGTH_SHORT);
-			toast.show();
+	    	
+	    	builder = new AlertDialog.Builder(this);
+	    	builder.setMessage("Are you sure you want to end this hand?")
+	    	       .setCancelable(false)
+	    	       .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+	    	           public void onClick(DialogInterface dialog, int id) {
+	    	        	   initialize();
+	    	           }
+	    	       })
+	    	       .setNegativeButton("No", new DialogInterface.OnClickListener() {
+	    	           public void onClick(DialogInterface dialog, int id) {
+	    	                dialog.cancel();
+	    	           }
+	    	       });
+	    	alert = builder.create();
+	    	alert.show();
+	    	
 	        return true;
+	    case R.id.scores:
+	    	startActivity(new Intent("com.fcsonline.android.ScoreScreen"));
+	    	return true;
 	    case R.id.help:
 
 	    	builder = new AlertDialog.Builder(this);

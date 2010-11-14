@@ -23,6 +23,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".LevelScreen">
+            <intent-filter>
+                <action android:name="com.fcsonline.android.LevelScreen" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ScoreScreen">
+            <intent-filter>
+                <action android:name="com.fcsonline.android.ScoreScreen" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
     <uses-sdk android:minSdkVersion="7" />
 
