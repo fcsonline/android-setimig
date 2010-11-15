@@ -25,6 +25,7 @@ public class Controller {
 	ImageProvider imageProvider;
 	
 	TextView textViewMoney;
+	TextView textViewMoneyGame;
 	TextView textViewSum;
 	TextView textViewBet;
 	TextView textViewUserName;
@@ -123,6 +124,7 @@ public class Controller {
 		Game game = player.getCurrent();
 		
 		textViewMoney.setText("$" + player.getMoney());
+		textViewMoneyGame.setText("");
 		textViewSum.setText("" + game.getSum());
 		textViewBet.setText("$" + game.getBet());
 		buttonUp.setEnabled(game.getBet() < 25);
@@ -235,17 +237,48 @@ public class Controller {
 			}
 			
 			lastmoney += partial;
-			/*
-			LinearLayout gameLayout =  gamesLayouts.get(i);
-			TextView labelScore = new TextView(layout.getContext());
-			labelScore.setText("asd" + partial);
-			labelScore.setTextColor(0x0000000F);
-			gameLayout.addView(labelScore);
-			*/
+			
 		}
 		
-		player.setMoney(player.getMoney() + lastmoney);
+		int totalmoney = player.getMoney() + lastmoney;
+		
+		player.setMoney(totalmoney);
 		textViewMoney.setText("$" + player.getMoney());
+		
+		if (lastmoney < 0) {
+			textViewMoneyGame.setText("/-$" + Math.abs(lastmoney));
+			textViewMoneyGame.setTextColor(0xFFFF0000);
+			
+			int score = preferences.getInt("score_l" + level + "_ml_val", 0);
+			
+			if (lastmoney < score) {
+				SharedPreferences.Editor prefEditor = preferences.edit();
+				prefEditor.putInt("score_l" + level + "_ml_val", lastmoney);
+				prefEditor.commit();
+			}
+			
+		} else {
+			textViewMoneyGame.setText("/+$" + lastmoney);
+			textViewMoneyGame.setTextColor(0xFF00DD00);
+			
+			int score = preferences.getInt("score_l" + level + "_mw_val", 0);
+			
+			if (lastmoney > score) {
+				SharedPreferences.Editor prefEditor = preferences.edit();
+				prefEditor.putInt("score_l" + level + "_mw_val", lastmoney);
+				prefEditor.commit();
+			}
+			
+		}
+		
+		int score = preferences.getInt("score_l" + level + "_hs_val", 0);
+		
+		if (totalmoney > score) {
+			SharedPreferences.Editor prefEditor = preferences.edit();
+			prefEditor.putInt("score_l" + level + "_hs_val", totalmoney);
+			prefEditor.commit();
+		}
+		
 	}
 
 	public void up() {
@@ -288,6 +321,14 @@ public class Controller {
 			Toast toast = Toast.makeText(layout.getContext(), "Splited!", Toast.LENGTH_SHORT);
 			toast.show();
 			
+			int score = preferences.getInt("score_l" + level + "_sp_val", 0);
+			
+			if (player.getGamesCount() > score) {
+				SharedPreferences.Editor prefEditor = preferences.edit();
+				prefEditor.putInt("score_l" + level + "_sp_val", player.getGamesCount());
+				prefEditor.commit();
+			}
+			
 			// Splitted game layout
 			LinearLayout gameLayout = new LinearLayout(layout.getContext());
 			gameLayout.setOrientation(LinearLayout.VERTICAL);
@@ -318,7 +359,7 @@ public class Controller {
 		ponderat = ponderat / suma;
 
 		switch (level) {
-			case 0:
+			case 1:
 				
 				//Strategy Level 0: When dealer reaches more than 5, it stands 
 				
@@ -326,7 +367,7 @@ public class Controller {
 					dgame.addCard(dealer.next());
 	
 				break;
-			case 1:
+			case 2:
 	
 				// Strategy Level 1: Dealer plays always it doesn't reach the ponderate value of all games of the player
 				
@@ -334,7 +375,7 @@ public class Controller {
 					dgame.addCard(dealer.next());
 	
 				break;
-			case 2:
+			case 3:
 	
 				// Strategy Level 2: Like strategy level 1, but it knows the next card. ;) 
 				
@@ -384,6 +425,10 @@ public class Controller {
 		this.textViewMoney = textViewMoney;
 	}
 
+	public void setTextViewMoneyGame(TextView textViewMoneyGame) {
+		this.textViewMoneyGame = textViewMoneyGame;
+	}
+	
 	public void setTextViewSum(TextView textViewSum) {
 		this.textViewSum = textViewSum;
 	}

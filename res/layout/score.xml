@@ -1,79 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout android:id="@+id/score_table_layout" xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:stretchColumns="1">
+    android:stretchColumns="1" android:padding="3dip">
 
     <!-- High Score Level 1-->
     <TableRow>
-        <TextView android:id="@+id/score_l1_hs_key" android:text="@string/score_l1_hs_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l1_hs_val" android:text="@string/score_l1_hs_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l1_hs_key" android:text="@string/score_l1_hs_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l1_hs_val" android:text="@string/score_l1_hs_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
 
     <!-- Max Win Level 1-->
     <TableRow>
-        <TextView android:id="@+id/score_l1_mw_key" android:text="@string/score_l1_mw_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l1_mw_val" android:text="@string/score_l1_mw_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l1_mw_key" android:text="@string/score_l1_mw_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l1_mw_val" android:text="@string/score_l1_mw_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
     
     <!-- Max Lost Level 1-->
     <TableRow>
-        <TextView android:id="@+id/score_l1_ml_key" android:text="@string/score_l1_ml_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l1_ml_val" android:text="@string/score_l1_ml_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l1_ml_key" android:text="@string/score_l1_ml_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l1_ml_val" android:text="@string/score_l1_ml_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
     
     <!-- Max Split Level 1-->
     <TableRow>
-        <TextView android:id="@+id/score_l1_sp_key" android:text="@string/score_l1_sp_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l1_sp_val" android:text="@string/score_l1_sp_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l1_sp_key" android:text="@string/score_l1_sp_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l1_sp_val" android:text="@string/score_l1_sp_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
 
     <!-- High Score Level 2-->
     <TableRow>
-        <TextView android:id="@+id/score_l2_hs_key" android:text="@string/score_l2_hs_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l2_hs_val" android:text="@string/score_l2_hs_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l2_hs_key" android:text="@string/score_l2_hs_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l2_hs_val" android:text="@string/score_l2_hs_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
 
     <!-- Max Win Level 2-->
     <TableRow>
-        <TextView android:id="@+id/score_l2_mw_key" android:text="@string/score_l2_mw_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l2_mw_val" android:text="@string/score_l2_mw_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l2_mw_key" android:text="@string/score_l2_mw_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l2_mw_val" android:text="@string/score_l2_mw_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
     
     <!-- Max Lost Level 2-->
     <TableRow>
-        <TextView android:id="@+id/score_l2_ml_key" android:text="@string/score_l2_ml_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l2_ml_val" android:text="@string/score_l2_ml_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l2_ml_key" android:text="@string/score_l2_ml_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l2_ml_val" android:text="@string/score_l2_ml_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
     
     <!-- Max Split Level 2-->
     <TableRow>
-        <TextView android:id="@+id/score_l2_sp_key" android:text="@string/score_l2_sp_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l2_sp_val" android:text="@string/score_l2_sp_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l2_sp_key" android:text="@string/score_l2_sp_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l2_sp_val" android:text="@string/score_l2_sp_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
 
     <!-- High Score Level 3-->
     <TableRow>
-        <TextView android:id="@+id/score_l3_hs_key" android:text="@string/score_l3_hs_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l3_hs_val" android:text="@string/score_l3_hs_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l3_hs_key" android:text="@string/score_l3_hs_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l3_hs_val" android:text="@string/score_l3_hs_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
 
     <!-- Max Win Level 3-->
     <TableRow>
-        <TextView android:id="@+id/score_l3_mw_key" android:text="@string/score_l3_mw_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l3_mw_val" android:text="@string/score_l3_mw_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l3_mw_key" android:text="@string/score_l3_mw_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l3_mw_val" android:text="@string/score_l3_mw_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
     
     <!-- Max Lost Level 3-->
     <TableRow>
-        <TextView android:id="@+id/score_l3_ml_key" android:text="@string/score_l3_ml_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l3_ml_val" android:text="@string/score_l3_ml_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l3_ml_key" android:text="@string/score_l3_ml_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l3_ml_val" android:text="@string/score_l3_ml_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
     
     <!-- Max Split Level 3-->
     <TableRow>
-        <TextView android:id="@+id/score_l3_sp_key" android:text="@string/score_l3_sp_key" android:padding="3dip" />
-        <TextView android:id="@+id/score_l3_sp_val" android:text="@string/score_l3_sp_val" android:padding="3dip" android:gravity="right" />
+        <TextView android:id="@+id/score_l3_sp_key" android:text="@string/score_l3_sp_key" android:padding="3dip" android:textSize="8pt"/>
+        <TextView android:id="@+id/score_l3_sp_val" android:text="@string/score_l3_sp_val" android:padding="3dip" android:textSize="8pt" android:gravity="right" />
     </TableRow>
 
 </TableLayout>

@@ -3,7 +3,9 @@
     android:orientation="vertical"
     android:gravity="center_vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" android:background="#05614c" android:paddingTop="50sp">
+    android:layout_height="fill_parent" android:background="#05614c" android:padding="30sp">
+
+	<TextView android:text="Choose Level:" android:id="@+id/TextViewChooseLevel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:textSize="12pt" android:gravity="center_horizontal" android:shadowColor="#000" android:shadowRadius="3" android:shadowDx="3" android:shadowDy="3" android:paddingBottom="30sp"></TextView>
 
 	<Button android:text="Easy" android:textSize="20dp" android:id="@+id/EasyButton" android:layout_width="fill_parent" android:layout_height="wrap_content"></Button>
 	<Button android:text="Medium" android:textSize="20dp" android:id="@+id/MediumButton" android:layout_width="fill_parent" android:layout_height="wrap_content"></Button>

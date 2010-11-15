@@ -26,16 +26,6 @@ public class SplashScreen extends Activity {
 				startActivity(new Intent("com.fcsonline.android.LevelScreen"));
 			}
 		});
-
-		Button prefButton = (Button) this.findViewById(R.id.PreferencesButton);
-		prefButton.setTypeface(font);
-		prefButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				finish();
-				startActivity(new Intent("com.fcsonline.android.PreferencesScreen"));
-			}
-		});
 		
 
 	}

@@ -3,7 +3,7 @@
     android:orientation="vertical"
     android:gravity="center_vertical"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" android:background="#05614c" android:paddingTop="50sp">
+    android:layout_height="fill_parent" android:background="#05614c">
 <ImageView
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
@@ -11,9 +11,8 @@
     android:src="@drawable/logo"
 />
 
-<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:layout_height="fill_parent" android:gravity="center_horizontal" android:orientation="vertical" android:paddingTop="20sp"  android:paddingLeft="50sp"  android:paddingRight="50sp">
+<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="fill_parent" android:layout_height="wrap_content" android:gravity="center_horizontal" android:orientation="vertical" android:paddingTop="20sp"  android:paddingLeft="50sp"  android:paddingRight="50sp">
 	<Button android:text="Starts!" android:textSize="20dp" android:id="@+id/StartButton" android:layout_width="fill_parent" android:layout_height="wrap_content"></Button>
-	<Button android:text="Preferences" android:textSize="20dp" android:id="@+id/PreferencesButton" android:layout_width="fill_parent" android:layout_height="wrap_content"></Button>
 	<TextView android:text="@string/licence" android:id="@+id/TextViewLicence" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:paddingBottom="10pt" android:gravity="center_horizontal" android:shadowColor="#000" android:shadowRadius="3" android:shadowDx="3" android:shadowDy="3"></TextView>
 	<TextView android:text="@string/source" android:id="@+id/TextViewSource" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#ffffff" android:textSize="6pt" android:gravity="center_horizontal" android:shadowColor="#000" android:shadowRadius="3" android:shadowDx="3" android:shadowDy="3"></TextView>
 </LinearLayout>

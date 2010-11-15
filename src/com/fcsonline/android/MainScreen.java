@@ -51,7 +51,8 @@ public class MainScreen extends Activity {
 		
 		Typeface font = Typeface.createFromAsset(getAssets(), "mailrays.ttf");
 		
-		((TextView) findViewById(R.id.TextViewMoney)).setTypeface(font);  
+		((TextView) findViewById(R.id.TextViewMoney)).setTypeface(font);
+		((TextView) findViewById(R.id.TextViewMoneyGame)).setTypeface(font);  
 		((TextView) findViewById(R.id.TextViewBet)).setTypeface(font); 
 		((TextView) findViewById(R.id.TextViewSum)).setTypeface(font); 
 		((TextView) findViewById(R.id.TextViewUserName)).setTypeface(font); 
@@ -78,7 +79,7 @@ public class MainScreen extends Activity {
 		opts.inScreenDensity = 1;
 		opts.inScaled = false;
 
-		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.raw.naipes, opts);
+		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.naipes, opts);
 		int spriteWidth = bitmap.getWidth() / 13; // A, 2, ..., Q, K
 		int spriteHeight = bitmap.getHeight() / 4; // h, c, d, s 
 		
@@ -92,9 +93,12 @@ public class MainScreen extends Activity {
 		controller.setPlayer(player);
 		controller.setLayout(layout);
 		controller.setTextViewMoney((TextView)findViewById(R.id.TextViewMoney));
+		controller.setTextViewMoneyGame((TextView)findViewById(R.id.TextViewMoneyGame));
 		controller.setTextViewSum((TextView)findViewById(R.id.TextViewSum));
 		controller.setTextViewBet((TextView)findViewById(R.id.TextViewBet));
 		controller.setTextViewUserName((TextView)findViewById(R.id.TextViewUserName));
+		
+		
 		
 		controller.setButtonUp((Button)findViewById(R.id.ButtonUp));
 		controller.setButtonDown((Button)findViewById(R.id.ButtonDown));
@@ -104,7 +108,14 @@ public class MainScreen extends Activity {
 		controller.setPreferences(preferences);
 		controller.setImageProvider(imageProvider);
 
-		controller.setLevel(0); // TODO: Select from a screen
+		int level = 1;
+		
+		Bundle extras = getIntent().getExtras(); 
+		if(extras != null) {
+			level = extras.getInt(LevelScreen.INTENT_LEVEL_KEY);
+		} 
+		
+		controller.setLevel(level);
 		
 		controller.setOnClickListenerLayout(new OnClickListener() {
 			@Override
